@@ -1,0 +1,46 @@
+---
+ - hosts: all
+   become: true
+   remote_user: ubuntu
+   vars:
+    NODEJS_VERSION: 8
+
+   tasks:
+    - name: Update cache repositories and install Nginx
+      apt:
+        name: nginx
+        update_cache: yes
+
+    - name: Create nginx directory structure
+      file: 
+        path: /etc/nginx/conf.d/
+        state: directory
+        mode: 0755
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+
+    - name: Update caches respository
+      apt:
+        update_cache: yes
+
+    - name: Add gpg key for NodeJS LTS
+      apt_key:
+        url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+        state: present
+
+    - name: Install the NodeJS LTS repo
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: yes
+
+    - name: Install Node.js
+      apt:  
+        name: nodejs
+        state: present
+    
+    - name: Install create react app
+      command: npx create-react-app my-app
